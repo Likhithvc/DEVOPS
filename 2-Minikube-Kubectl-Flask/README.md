@@ -4,7 +4,7 @@
 
 Deploy a Python Flask application on a local Kubernetes cluster using Minikube, Docker, `kubectl`, and Kubernetes YAML.
 
-The exercise demonstrates how to:
+This exercise demonstrates how to:
 
 - Create a Flask application.
 - Containerize the Flask application using Docker.
@@ -36,7 +36,7 @@ The exercise demonstrates how to:
 ## Project Structure
 
 ```text
-02-Flask-Minikube/
+2-Minikube-Kubectl-Flask/
 │
 ├── README.md
 ├── app.py
@@ -74,7 +74,7 @@ The Minikube host was successfully running.
 
 ### Screenshot
 
-![Minikube Start and Status](2-Minikube-Kubectl-Flask\screenshots\01-minikube-start-status.png)
+![Minikube Start and Status](./screenshots/01-minikube-start-status.png)
 
 ---
 
@@ -278,12 +278,6 @@ kubectl get pods -l app=flask-app
 
 The Flask Pod successfully reached the `Running` state.
 
-The Pod used in this exercise was:
-
-```text
-flask-app-59f7cdccb4-cps2v
-```
-
 The Pod showed:
 
 ```text
@@ -309,13 +303,9 @@ The Flask application was exposed using:
 flask-app-service
 ```
 
-The Service used the `NodePort` type and mapped:
+The Service used the `NodePort` type.
 
-```text
-15000:32042/TCP
-```
-
-The mapping is:
+The mapping between the Service and the Flask container is:
 
 ```text
 Service Port 15000
@@ -339,7 +329,7 @@ The Flask Service was accessed using Minikube.
 minikube service flask-app-service --url
 ```
 
-Minikube generated the following local URL:
+Minikube generated the local URL:
 
 ```text
 http://127.0.0.1:52858
@@ -367,7 +357,7 @@ This confirms that the request successfully travelled through the Kubernetes Ser
 
 ### Screenshot
 
-![Flask Application](2-Minikube-Kubectl-Flask\screenshots\03-flask-browser.png)
+![Flask Application](./screenshots/03-flask-browser.png)
 
 ---
 
@@ -406,7 +396,7 @@ The outputs confirmed that:
 
 ### Screenshot
 
-![Kubernetes Deployment and Service](2-Minikube-Kubectl-Flask\screenshots\02-kubernetes-deployment-service.png)
+![Kubernetes Deployment and Service](./screenshots/02-kubernetes-deployment-service.png)
 
 ---
 
@@ -451,7 +441,7 @@ kubectl logs <POD_NAME>
 For example:
 
 ```powershell
-kubectl logs flask-app-59f7cdccb4-cps2v
+kubectl logs <your-flask-pod-name>
 ```
 
 The logs confirm that Flask is running and listening on port `15000`.
@@ -526,23 +516,23 @@ The complete architecture for this exercise is:
                   Minikube Service URL
                            |
                            v
-                flask-app-service
-                    NodePort
+                  flask-app-service
+                       NodePort
                            |
                            v
-                  Service Port 15000
+                    Service Port 15000
                            |
                            v
-                 Target Port 15000
+                    Target Port 15000
                            |
                            v
-                Flask Kubernetes Pod
+                    Flask Kubernetes Pod
                            |
                            v
-                  Flask Container
+                     Flask Container
                            |
                            v
-                    Flask :15000
+                       Flask :15000
 ```
 
 The application flow is:
@@ -565,7 +555,7 @@ Flask Application
 
 Through this exercise, I learned how to deploy a Python application on Kubernetes using Docker, Minikube, `kubectl`, and YAML.
 
-### Key concepts learned
+### Key Concepts Learned
 
 - How to create a Flask application.
 - How to containerize a Python application using Docker.
