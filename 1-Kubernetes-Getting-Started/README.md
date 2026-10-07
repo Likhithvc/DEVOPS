@@ -87,7 +87,7 @@ The `1/1` value under `READY` indicates that the single container inside the Pod
 
 ### Screenshot
 
-![Kubernetes Pod Deployment](1-Kubernetes-Getting-Started\screenshots\02-nginx-welcome-page (1).png)
+![Kubernetes Pod Deployment](C:\Users\likhi\Documents\DEVOPS\1-Kubernetes-Getting-Started\screenshots\02-nginx-welcome-page (1).png)
 
 ---
 
@@ -142,7 +142,7 @@ This confirms that:
 
 ### Screenshot
 
-![Nginx Welcome Page](1-Kubernetes-Getting-Started\screenshots\02-nginx-welcome-page (2).png)
+![Nginx Welcome Page](C:\Users\likhi\Documents\DEVOPS\1-Kubernetes-Getting-Started\screenshots\02-nginx-welcome-page (2).png)
 
 ---
 
