@@ -20,9 +20,9 @@ For this exercise, the Nginx container is used to simulate the web application.
 
 ## Environment
 
-- OS: Windows 11 Home Single Language
-- Kubernetes: v1.35.1
-- Minikube: v1.38.1
+- OS: Windows 11 Home Single Language 26H2
+- Kubernetes: v1.37.0
+- Minikube: v1.39.0
 - Container Runtime: Docker
 - Kubernetes Driver: Docker
 - Application: Nginx
@@ -39,10 +39,12 @@ Minikube was used to create a local single-node Kubernetes cluster.
 ### Command
 
 ```powershell
-minikube start
+minikube start --driver=docker
 ```
 
 Minikube successfully started using Docker as the container driver, and `kubectl` was configured to use the Minikube cluster.
+
+The Kubernetes environment was successfully initialized and the cluster was ready to deploy applications.
 
 ---
 
@@ -76,7 +78,7 @@ kubectl get pods
 
 The Pod successfully reached the `Running` state.
 
-Example output:
+### Output
 
 ```text
 NAME        READY   STATUS    RESTARTS   AGE
@@ -87,7 +89,7 @@ The `1/1` value under `READY` indicates that the single container inside the Pod
 
 ### Screenshot
 
-![Kubernetes Pod Deployment](C:\Users\likhi\Documents\DEVOPS\1-Kubernetes-Getting-Started\screenshots\02-nginx-welcome-page (1).png)
+![Kubernetes Pod Deployment](./screenshots/01-kubernetes-deployment.png)
 
 ---
 
@@ -142,7 +144,7 @@ This confirms that:
 
 ### Screenshot
 
-![Nginx Welcome Page](C:\Users\likhi\Documents\DEVOPS\1-Kubernetes-Getting-Started\screenshots\02-nginx-welcome-page (2).png)
+![Nginx Welcome Page](./screenshots/02-nginx-welcome-page.png)
 
 ---
 
@@ -241,7 +243,7 @@ In this exercise, Minikube was used with Docker as the container driver.
 ### Start Minikube
 
 ```powershell
-minikube start
+minikube start --driver=docker
 ```
 
 ### Create Pod
