@@ -11,7 +11,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the Python Flask Docker image...'
-                sh 'docker build -t "$APP_IMAGE" python-flask-app'
+                sh 'docker build -t "$APP_IMAGE" devops-sample-code/python-flask-app'
             }
         }
 
