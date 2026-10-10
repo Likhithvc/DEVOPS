@@ -1,0 +1,93 @@
+pipeline {
+    agent any
+
+    environment {
+        APP_IMAGE = 'python-flask-app-ex9:1.0'
+        APP_CONTAINER = 'python-flask-app-ex9'
+        APP_NETWORK = 'python-flask-app-ex9-net'
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building the Python Flask Docker image...'
+                sh 'docker build -t "$APP_IMAGE" python-flask-app'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running Python unit tests...'
+                sh 'docker run --rm --entrypoint python "$APP_IMAGE" -m unittest discover -s .'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying the Flask application...'
+                sh '''
+                    docker network inspect "$APP_NETWORK" >/dev/null 2>&1 || \
+                        docker network create "$APP_NETWORK"
+
+                    docker rm -f "$APP_CONTAINER" >/dev/null 2>&1 || true
+
+                    docker run -d \
+                        --name "$APP_CONTAINER" \
+                        --network "$APP_NETWORK" \
+                        --restart unless-stopped \
+                        -p 5005:5000 \
+                        "$APP_IMAGE"
+                '''
+            }
+        }
+
+        stage('Run Application') {
+            steps {
+                echo 'Checking application container status...'
+                sh '''
+                    for i in $(seq 1 15); do
+                        if [ "$(docker inspect -f '{{.State.Running}}' "$APP_CONTAINER" 2>/dev/null)" = "true" ]; then
+                            echo "Application container is running."
+                            docker ps --filter "name=$APP_CONTAINER"
+                            exit 0
+                        fi
+                        sleep 2
+                    done
+
+                    echo "Application container failed to start."
+                    docker logs "$APP_CONTAINER" || true
+                    exit 1
+                '''
+            }
+        }
+
+        stage('Test Application') {
+            steps {
+                echo 'Testing the deployed Flask application...'
+                sh '''
+                    docker exec "$APP_CONTAINER" python -c "
+import urllib.request
+response = urllib.request.urlopen('http://127.0.0.1:5000/', timeout=5)
+body = response.read().decode()
+print('HTTP status:', response.status)
+print('Response:', body)
+assert response.status == 200
+assert body == 'Hello, Jenkins Multi-Stage Pipeline!'
+"
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check the logs for more details.'
+        }
+        always {
+            echo 'Pipeline execution finished.'
+        }
+    }
+}
