@@ -1,0 +1,138 @@
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+    }
+
+    stages {
+        stage('Pre-check Docker') {
+            steps {
+                echo 'Checking Docker availability...'
+                sh 'docker --version'
+                sh 'docker info > /dev/null'
+                sh 'docker network inspect delivery-monitoring-net > /dev/null'
+                echo 'Docker and monitoring network are available.'
+            }
+        }
+
+        stage('Prepare Workspace') {
+            steps {
+                echo 'Preparing delivery monitoring application files...'
+
+                writeFile file: 'delivery_metrics.py', text: '''from prometheus_client import start_http_server, Summary, Gauge
+import random
+import time
+
+total_deliveries = Gauge(
+    "total_deliveries",
+    "Total number of deliveries"
+)
+pending_deliveries = Gauge(
+    "pending_deliveries",
+    "Number of pending deliveries"
+)
+on_the_way_deliveries = Gauge(
+    "on_the_way_deliveries",
+    "Number of deliveries on the way"
+)
+average_delivery_time = Summary(
+    "average_delivery_time",
+    "Average delivery time in seconds"
+)
+
+def simulate_delivery():
+    pending = random.randint(10, 20)
+    on_the_way = random.randint(5, 20)
+    delivered = random.randint(30, 70)
+    avg_time = random.uniform(15, 45)
+
+    total = pending + on_the_way + delivered
+
+    print(f"[DEBUG] Total deliveries: {total}", flush=True)
+    print(f"[DEBUG] Pending deliveries: {pending}", flush=True)
+    print(f"[DEBUG] On-the-way deliveries: {on_the_way}", flush=True)
+    print(f"[DEBUG] Average delivery time: {avg_time:.2f} seconds", flush=True)
+
+    total_deliveries.set(total)
+    pending_deliveries.set(pending)
+    on_the_way_deliveries.set(on_the_way)
+    average_delivery_time.observe(avg_time)
+
+if __name__ == "__main__":
+    print("[INFO] Starting metrics server on port 8000...", flush=True)
+    start_http_server(8000, addr="0.0.0.0")
+
+    while True:
+        simulate_delivery()
+        time.sleep(1)
+'''
+
+                writeFile file: 'requirements.txt', text: 'prometheus-client\\n'
+
+                writeFile file: 'Dockerfile', text: '''FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY delivery_metrics.py .
+EXPOSE 8000
+CMD ["python", "-u", "delivery_metrics.py"]
+'''
+                echo 'Workspace files are ready.'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo 'Building delivery metrics image...'
+                sh 'docker build -t delivery-metrics:1.0 .'
+            }
+        }
+
+        stage('Deploy Metrics Exporter') {
+            steps {
+                echo 'Replacing the existing metrics exporter...'
+
+                sh 'docker rm -f delivery-metrics || true'
+
+                sh '''
+                    docker run -d \
+                      --name delivery-metrics \
+                      --network delivery-monitoring-net \
+                      -p 8001:8000 \
+                      delivery-metrics:1.0
+                '''
+
+                sleep(time: 3, unit: 'SECONDS')
+
+                echo 'Checking the metrics endpoint inside the container...'
+
+                sh '''
+                    docker exec delivery-metrics python -c \
+                    "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/metrics', timeout=5).status)"
+                '''
+            }
+        }
+
+        stage('Verify Monitoring Stack') {
+            steps {
+                echo 'Verifying Prometheus and Grafana containers...'
+
+                sh '''docker ps --format '{{.Names}}' | grep -Fx prometheus'''
+                sh '''docker ps --format '{{.Names}}' | grep -Fx grafana'''
+
+                echo 'Prometheus and Grafana are running.'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'SUCCESS: Delivery monitoring pipeline completed.'
+        }
+
+        failure {
+            echo 'FAILED: Check the stage logs for the error.'
+        }
+    }
+}
