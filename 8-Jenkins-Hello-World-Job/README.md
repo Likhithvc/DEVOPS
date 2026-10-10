@@ -1,80 +1,176 @@
-# Exercise 7 – Introduction to Continuous Integration (CI) and Jenkins Installation
+# Exercise 8 – Creating a Hello World Jenkins Job
 
 ## Objective
 
-The objective of this exercise is to understand the fundamentals of Continuous Integration (CI), learn about Jenkins as a CI automation tool, and configure a Jenkins pipeline to demonstrate an automated build and testing workflow.
+The objective of this exercise is to create a simple shell script, store it in a GitHub repository, and configure a Jenkins Freestyle project to retrieve and execute the script automatically when a build is triggered.
 
 The exercise covers:
 
-- Understanding Continuous Integration and its importance in software development.
-- Learning the basic concepts and workflow of Jenkins.
-- Setting up and accessing Jenkins using Docker.
-- Creating and configuring a Jenkins Pipeline job.
-- Automating application source preparation, build validation, and testing.
-- Observing successful and failed builds through Jenkins Console Output.
-- Understanding how automated feedback helps developers identify errors early.
+- Creating a public GitHub repository.
+- Writing a shell script named `hello-world.sh`.
+- Initializing a local Git repository and pushing the script to GitHub.
+- Understanding GitHub Personal Access Token (PAT) authentication.
+- Configuring Jenkins Source Code Management using Git.
+- Creating and executing a Jenkins Freestyle project.
+- Viewing and verifying build logs using Jenkins Console Output.
 
 ---
 
-## 1. Introduction to Continuous Integration
+## 1. Create a GitHub Repository
 
-Continuous Integration is a software development practice in which developers integrate code changes into a shared repository frequently. Each change can be validated through an automated build and testing process.
+A public GitHub repository named `devops-sample-code` was created to store the shell script used in this exercise.
 
-The purpose of CI is to identify integration problems and software defects early in the development process.
+### Repository Details
 
-### Benefits of Continuous Integration
-
-- **Early Bug Detection:** Automated tests help identify defects soon after changes are introduced.
-- **Improved Collaboration:** Developers integrate their changes regularly, reducing integration conflicts.
-- **Faster Development Cycles:** Automated build and test processes reduce repetitive manual work.
-- **Improved Code Quality:** Consistent validation helps maintain reliable software.
-- **Immediate Feedback:** Developers can inspect build results and investigate failures quickly.
-
-### Basic CI Workflow
-
-1. A developer makes changes to the application source code.
-2. The changes are committed and pushed to a shared repository.
-3. A CI server retrieves or receives the updated code.
-4. The application is built or validated.
-5. Automated tests are executed.
-6. The CI server reports whether the build and tests succeeded or failed.
-7. Developers investigate failures and make the necessary corrections.
-
-**Note:** In this exercise, the demonstration pipeline is started manually using Jenkins' **Build Now** option. Automatic execution on Git pushes or webhook integration is not configured.
-
----
-
-## 2. Introduction to Jenkins
-
-[Jenkins](https://www.jenkins.io/) is an open-source automation server used to automate software development tasks, including building, testing, and deploying applications.
-
-Jenkins supports automation through jobs, pipelines, plugins, and distributed build agents.
-
-### Important Jenkins Concepts
-
-| Concept | Description |
+| Property | Value |
 |---|---|
-| Job | A configured task that Jenkins can execute. |
-| Build | A single execution of a Jenkins job. |
-| Pipeline | A sequence of automated stages that defines a workflow. |
-| Stage | A logical section of a pipeline, such as Build or Test. |
-| Plugin | An extension that adds functionality to Jenkins. |
-| Agent | A system or execution environment where pipeline steps run. |
-| Console Output | The log containing messages, commands, errors, and build results. |
+| Repository Name | `devops-sample-code` |
+| Description | A demo repository for Jenkins scripting |
+| Visibility | Public |
+| Default Branch | `main` |
+| Script File | `hello-world.sh` |
 
-### Examples of CI Tools
+### GitHub Repository
 
-- Jenkins
-- GitHub Actions
-- GitLab CI/CD
-- CircleCI
-- Azure Pipelines
+Repository URL:
+
+[devops-sample-code](https://github.com/Likhithvc/devops-sample-code)
+
+The repository contains the shell script that Jenkins retrieves and executes during the build.
 
 ---
 
-## 3. Jenkins Setup Using Docker
+## 2. Create the Hello World Shell Script
 
-Jenkins was already installed and running in the Docker environment configured during the previous exercise. The same instance was reused to avoid creating a second container and conflicting with existing ports.
+A shell script named `hello-world.sh` was created locally.
+
+### Script Content
+
+```bash
+#!/bin/bash
+echo "Hello, Jenkins!"
+```
+
+### Explanation
+
+- `#!/bin/bash` specifies Bash as the interpreter.
+- `echo "Hello, Jenkins!"` prints a message to the console when the script runs.
+
+### Create the Script Using PowerShell
+
+The script was created using the following PowerShell commands:
+
+```powershell
+[System.IO.File]::WriteAllText(
+    (Join-Path (Get-Location) "hello-world.sh"),
+    "#!/bin/bash`necho `"Hello, Jenkins!`"`n"
+)
+```
+
+The file content was verified using:
+
+```powershell
+Get-Content .\hello-world.sh
+```
+
+Expected output:
+
+```text
+#!/bin/bash
+echo "Hello, Jenkins!"
+```
+
+---
+
+## 3. Initialize Git and Commit the Script
+
+The local repository was cloned from GitHub:
+
+```powershell
+git clone https://github.com/Likhithvc/devops-sample-code.git
+```
+
+The following commands were executed from inside the cloned repository.
+
+### Navigate to the Repository
+
+```powershell
+Set-Location "$HOME\Documents\devops-sample-code"
+```
+
+### Stage the Script
+
+```powershell
+git add hello-world.sh
+```
+
+### Verify Git Status
+
+```powershell
+git status
+```
+
+The script appeared as a new file ready to be committed.
+
+### Commit the Changes
+
+```powershell
+git commit -m "Add hello-world.sh"
+```
+
+### Push the Script to GitHub
+
+```powershell
+git push -u origin main
+```
+
+After the push completed successfully, `hello-world.sh` was available in the public GitHub repository.
+
+**Note:** Since the repository was created on GitHub and then cloned locally, the `origin` remote was already configured. A separate `git init` and `git remote add origin` were not required.
+
+---
+
+## 4. GitHub Personal Access Token
+
+A Personal Access Token (PAT) can be used to authenticate Git operations over HTTPS when GitHub requests a token.
+
+Official GitHub documentation:
+
+[Creating a fine-grained personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
+
+For this exercise:
+
+- A PAT may be used if GitHub requests HTTPS authentication.
+- The token should have only the permissions necessary for the operation.
+- The token must never be committed to a repository or shared publicly.
+- Because the repository is public, Jenkins can clone it without GitHub credentials.
+
+---
+
+## 5. Verify the Script on GitHub
+
+After pushing the changes, the repository was opened in a web browser to verify that the file was uploaded correctly.
+
+Repository:
+
+[devops-sample-code](https://github.com/Likhithvc/devops-sample-code)
+
+The `hello-world.sh` file contains:
+
+```bash
+#!/bin/bash
+echo "Hello, Jenkins!"
+```
+
+### Screenshot 1: Hello World Script on GitHub
+
+![Hello World Script on GitHub](Images/ex8-03-hello-world-script-on-github.png)
+
+---
+
+## 6. Ensure Jenkins Is Running
+
+Jenkins was already installed and running in Docker from the previous exercises. The existing instance was reused rather than installing another Jenkins container.
 
 ### Environment Details
 
@@ -84,331 +180,198 @@ Jenkins was already installed and running in the Docker environment configured d
 | Container Name | `jenkins-ex6` |
 | Docker Image | `jenkins/jenkins:lts` |
 | Jenkins Dashboard | `http://localhost:8082` |
-| Jenkins Web Port | `8082:8080` |
-| Agent Communication Port | `50001:50000` |
-| Operating Environment | Windows with Docker Desktop |
+| Host-to-Container Web Port | `8082:8080` |
+| Host-to-Container Agent Port | `50001:50000` |
 
 ### Verify the Jenkins Container
 
-Run the following command in PowerShell:
+Run this command in PowerShell:
 
 ```powershell
 docker ps --filter "name=jenkins-ex6"
 ```
 
-The container should appear in the output with a running status.
+The container should appear with a running status.
 
-### Access the Jenkins Dashboard
+Open the Jenkins dashboard:
 
-Open the following URL in a web browser:
+[http://localhost:8082](http://localhost:8082)
 
-```text
-http://localhost:8082
-```
-
-After authentication, the Jenkins dashboard can be used to create jobs, configure pipelines, execute builds, and inspect results.
-
-### Screenshot 1: Jenkins Dashboard
-
-![Jenkins Dashboard](Images/ex7-01-jenkins-dashboard.png)
+Log in using the existing Jenkins credentials.
 
 ---
 
-## 4. Creating a Jenkins Pipeline Job
+## 7. Create a Jenkins Freestyle Project
 
-A new Jenkins Pipeline job named `basic-ci-demo` was created to demonstrate a basic CI workflow.
+A Jenkins Freestyle project named `HelloWorld` was created to retrieve the shell script from GitHub and execute it.
 
 ### Procedure
 
 1. Open the Jenkins dashboard.
 2. Click **New Item**.
-3. Enter the item name `basic-ci-demo`.
-4. Select **Pipeline**.
-5. Click **OK**.
-6. Scroll down to the **Pipeline** section.
-7. Set **Definition** to `Pipeline script`.
-8. Enter the pipeline script provided below.
-9. Click **Save** to store the configuration.
+3. Enter `HelloWorld` as the job name.
+4. Select **Freestyle project**.
+5. Click **OK** to create the job.
 
-### Screenshot 2: CI Pipeline Configuration
+### General Configuration
 
-![CI Pipeline Configuration](Images/ex7-02-ci-pipeline-configuration.png)
-
----
-
-## 5. Jenkins Pipeline Script
-
-The following pipeline demonstrates three stages:
-
-1. **Prepare Source:** Creates a small shell application.
-2. **Build:** Checks the shell script for syntax errors.
-3. **Test:** Runs the application and verifies its output.
-
-The pipeline also reports whether the execution succeeds or fails.
-
-### Pipeline Script
-
-```groovy
-pipeline {
-    agent any
-
-    stages {
-        stage('Prepare Source') {
-            steps {
-                echo 'Preparing application source...'
-                sh '''
-                    set -eu
-                    mkdir -p build
-
-                    cat > build/hello.sh <<'EOF'
-#!/bin/sh
-set -eu
-printf '%s\\n' 'Hello from Jenkins CI!'
-EOF
-
-                    chmod +x build/hello.sh
-                '''
-            }
-        }
-
-        stage('Build') {
-            steps {
-                echo 'Validating application build...'
-                sh '''
-                    set -eu
-                    sh -n build/hello.sh
-                    echo "Build completed successfully."
-                '''
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Running application test...'
-                sh '''
-                    set -eu
-                    output="$(./build/hello.sh)"
-                    printf 'Application output: %s\\n' "$output"
-
-                    test "$output" = "Hello from Jenkins CI!"
-                    echo "Test passed successfully."
-                '''
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'SUCCESS: CI build and tests passed.'
-        }
-        failure {
-            echo 'FAILURE: The CI pipeline failed. Check the console output.'
-        }
-        always {
-            echo 'CI pipeline execution finished.'
-        }
-    }
-}
-```
-
-### Explanation of the Pipeline
-
-**Prepare Source**
-
-Creates a `build` directory and generates a shell script named `hello.sh`. The script prints a predefined message.
-
-**Build**
-
-Uses `sh -n` to check the generated shell script for syntax errors. If the validation succeeds, the build stage continues.
-
-**Test**
-
-Executes the application, captures its output, and compares it against the expected message:
+In the **Description** field, enter:
 
 ```text
-Hello from Jenkins CI!
+Hello World! Jenkins job.
 ```
 
-The test passes only when the actual output matches the expected output.
+### Source Code Management
 
-**Post Actions**
+1. Navigate to the **Source Code Management** section.
+2. Select **Git**.
+3. Enter the repository URL:
 
-- `success`: Prints a success message when the pipeline succeeds.
-- `failure`: Prints a failure message when a pipeline step fails.
-- `always`: Prints a message regardless of the final build result.
+```text
+https://github.com/Likhithvc/devops-sample-code.git
+```
+
+4. Under **Branches to build**, specify:
+
+```text
+*/main
+```
+
+5. Since the repository is public, leave the Git credentials setting as `- none -`.
+
+This configuration allows Jenkins to retrieve the script from the `main` branch.
+
+### Build Configuration
+
+1. Scroll to the **Build** section.
+2. Click **Add build step**.
+3. Select **Execute shell**.
+4. Enter the following command:
+
+```sh
+sh hello-world.sh
+```
+
+Jenkins first checks out the repository into the job workspace. The build step then runs the script from that workspace.
+
+### Save the Job
+
+Click **Save** to store the configuration.
+
+### Screenshot 2: HelloWorld Job Configuration
+
+![HelloWorld Job Configuration](Images/ex8-01-helloworld-job-configuration.png)
 
 ---
 
-## 6. Executing the CI Pipeline
+## 8. Execute the Jenkins Job
 
-After saving the job configuration, the pipeline was executed using Jenkins.
+After saving the configuration, the job was executed manually.
 
 ### Procedure
 
-1. Open the `basic-ci-demo` job.
+1. Open the `HelloWorld` job in Jenkins.
 2. Click **Build Now**.
-3. Wait for the build to finish.
-4. Open the build number from **Build History**.
-5. Click **Console Output**.
-6. Verify that the source preparation, build validation, and test stages complete successfully.
+3. Wait for the build to complete.
+4. Locate the latest build in **Build History**.
+5. Click the build number, such as `#1`.
+6. Click **Console Output** to inspect the execution logs.
 
-### Expected Output
+### Expected Console Output
 
-The console output should include messages similar to:
+The output should contain messages similar to the following:
 
 ```text
-Preparing application source...
-Validating application build...
-Build completed successfully.
-Running application test...
-Application output: Hello from Jenkins CI!
-Test passed successfully.
-SUCCESS: CI build and tests passed.
-CI pipeline execution finished.
+Started by user ...
+Building in workspace /var/jenkins_home/workspace/HelloWorld
+[HelloWorld] $ /bin/sh -xe ...
++ sh hello-world.sh
+Hello, Jenkins!
 Finished: SUCCESS
 ```
 
-### Screenshot 3: Successful CI Pipeline
+The exact log messages, temporary script path, and build number may differ depending on the environment.
 
-![Successful CI Pipeline](Images/ex7-03-ci-pipeline-success.png)
+### Verification
 
----
+The job is considered successful when:
 
-## 7. Demonstrating Test Failure Detection
+- Jenkins successfully checks out the GitHub repository.
+- The shell script executes without errors.
+- The message `Hello, Jenkins!` appears in the console output.
+- The build finishes with `Finished: SUCCESS`.
 
-A CI pipeline must detect unsuccessful tests as well as successful ones. To demonstrate this behavior, the expected output in the test stage was temporarily modified to an incorrect value.
+### Screenshot 3: Successful HelloWorld Build
 
-### Procedure
-
-1. Open `basic-ci-demo` and click **Configure**.
-2. Locate the test assertion in the pipeline script.
-3. Temporarily replace the correct assertion:
-
-```sh
-test "$output" = "Hello from Jenkins CI!"
-```
-
-with an intentionally incorrect assertion:
-
-```sh
-test "$output" = "Incorrect expected output"
-```
-
-4. Save the configuration.
-5. Click **Build Now**.
-6. Open the new build and inspect **Console Output**.
-
-### Expected Result
-
-The application continues to print:
-
-```text
-Hello from Jenkins CI!
-```
-
-However, the test expects a different message. Therefore, the test fails and Jenkins marks the pipeline build as failed.
-
-The pipeline's `failure` post action prints:
-
-```text
-FAILURE: The CI pipeline failed. Check the console output.
-```
-
-This demonstrates how automated testing can identify incorrect expectations and provide immediate feedback.
-
-**Important:** The incorrect expected value was introduced only for testing failure handling. The correct assertion was restored afterward.
-
-### Screenshot 4: CI Test Failure
-
-![CI Test Failure](Images/ex7-04-ci-test-failure.png)
+![Successful HelloWorld Build](Images/ex8-02-helloworld-build-success.png)
 
 ---
 
-## 8. Restoring the Pipeline and Verifying Success
+## 9. How the Jenkins Job Works
 
-After demonstrating failure detection, the original expected output was restored.
+The job follows a simple CI workflow.
 
-### Procedure
+1. **Source Repository:** The shell script is stored in the GitHub repository.
+2. **Source Code Checkout:** Jenkins clones or updates the repository in the job workspace.
+3. **Build Step:** Jenkins executes `sh hello-world.sh`.
+4. **Script Execution:** The shell runs the script and prints `Hello, Jenkins!`.
+5. **Build Result:** Jenkins records the console logs and marks the build as successful if all steps complete successfully.
 
-1. Open `basic-ci-demo` and click **Configure**.
-2. Restore the correct test assertion:
+This demonstrates how Jenkins can retrieve source code from version control and execute automated commands.
 
-```sh
-test "$output" = "Hello from Jenkins CI!"
-```
-
-3. Click **Save**.
-4. Open the job and click **Build Now**.
-5. Open the latest build and select **Console Output**.
-6. Confirm that the test passes and the final build status is **Success**.
-
-### Expected Result
-
-The latest build should finish with:
-
-```text
-SUCCESS: CI build and tests passed.
-CI pipeline execution finished.
-Finished: SUCCESS
-```
-
-The failed build from the previous step remains in the build history, demonstrating both failure detection and recovery after correcting the test.
-
-### Screenshot 5: Final Successful Build
-
-![Final Successful CI Build](Images/ex7-05-ci-final-success.png)
+**Build triggering:** In this exercise, the build is started manually using **Build Now**. Automatic triggers on GitHub pushes would require additional job configuration, such as polling or a webhook.
 
 ---
 
-## 9. Results
+## 10. Results
 
 The exercise was completed successfully.
 
-- Studied the purpose, benefits, and workflow of Continuous Integration.
-- Understood Jenkins jobs, builds, stages, pipelines, and console logs.
-- Accessed Jenkins through Docker using the existing Jenkins instance.
-- Created and configured the `basic-ci-demo` Pipeline job.
-- Automated source preparation, build validation, and a basic application test.
-- Verified that the pipeline reports a successful build when the test passes.
-- Deliberately introduced an incorrect expected value and observed the resulting test failure.
-- Restored the correct assertion and verified a successful final build.
-
-The exercise demonstrated how Jenkins can automate validation tasks and provide feedback about software quality.
-
----
-
-## 10. Key Takeaways
-
-1. Continuous Integration encourages frequent integration and automated validation of code changes.
-2. Jenkins pipelines define repeatable workflows using stages and steps.
-3. Automated tests can identify incorrect behavior without requiring manual verification for each build.
-4. Jenkins reports pipeline status and displays logs that help developers diagnose failures.
-5. A failed build should be investigated and corrected before treating the workflow as successful.
-6. This demonstration uses manual build triggering. Connecting a source repository and configuring webhooks would be required to automate builds on new commits.
+- Created a GitHub repository named `devops-sample-code`.
+- Created the `hello-world.sh` script.
+- Committed and pushed the script to the GitHub repository.
+- Verified the script in the public repository.
+- Reused the existing Jenkins Docker instance.
+- Created a Jenkins Freestyle project named `HelloWorld`.
+- Configured Git as the Source Code Management provider.
+- Configured the shell command `sh hello-world.sh` as the build step.
+- Triggered the Jenkins build and examined its Console Output.
+- Verified that the application printed `Hello, Jenkins!` and the build completed successfully.
 
 ---
 
-## 11. Folder Structure
+## 11. Key Takeaways
 
-The Exercise 7 files are organized as follows:
+1. GitHub can be used to store and version-control scripts.
+2. Jenkins can retrieve code from a Git repository through Source Code Management.
+3. A Freestyle project can execute shell commands as part of a build.
+4. The Jenkins workspace contains the checked-out source files used by the job.
+5. Console Output provides useful information for verifying execution and diagnosing errors.
+6. A successful build confirms that the configured checkout and build steps completed without reported errors.
+
+---
+
+## 12. Project Structure
+
+The Exercise 8 documentation and screenshots are organized as follows:
 
 ```text
-7-Jenkins-CI-Automation/
+8-Jenkins-Hello-World-Job/
 ├── README.md
 └── Images/
-    ├── ex7-01-jenkins-dashboard.png
-    ├── ex7-02-ci-pipeline-configuration.png
-    ├── ex7-03-ci-pipeline-success.png
-    ├── ex7-04-ci-test-failure.png
-    └── ex7-05-ci-final-success.png
+    ├── ex8-01-helloworld-job-configuration.png
+    ├── ex8-02-helloworld-build-success.png
+    └── ex8-03-hello-world-script-on-github.png
 ```
 
-The pipeline script is stored in the Jenkins job configuration. It is included in this README for documentation and reproducibility.
+The executable shell script is maintained in the separate GitHub repository:
+
+[devops-sample-code](https://github.com/Likhithvc/devops-sample-code)
 
 ---
 
 ## Conclusion
 
-This exercise introduced Continuous Integration and demonstrated Jenkins as an automation server. A basic pipeline was configured to prepare application source code, validate the build, and run an automated test. Both successful execution and intentional test failure were observed, followed by a successful run after restoring the correct test assertion.
+This exercise demonstrated how to connect Jenkins to a GitHub repository and run a shell script through a Freestyle project. Jenkins retrieved `hello-world.sh`, executed it in the job workspace, displayed the expected message, and reported a successful build.
 
-The exercise illustrates how automated build validation, testing, and feedback can support more reliable software development workflows.
+The exercise introduced the fundamental integration between GitHub, Git, shell scripting, and Jenkins, providing a foundation for more advanced CI pipelines and automated build workflows.
